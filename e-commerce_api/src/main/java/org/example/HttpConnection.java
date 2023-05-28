@@ -4,8 +4,10 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
@@ -38,7 +40,11 @@ public class HttpConnection {
             }else if(path.contains("/users") && method.equals("DELETE")){
                 response = usersHandler.deleteMethod(path);
             }else if(path.contains("/users") && method.equals("POST")){
-
+                JSONObject requestBodyJson = parseRequestBody(exchange.getRequestBody());
+                response = usersHandler.postMethod(requestBodyJson);
+            }else if(path.contains("/users") && method.equals("PUT")){
+                JSONObject requestBodyJson = parseRequestBody(exchange.getRequestBody());
+                response = usersHandler.putMethod(path, requestBodyJson);
             }
 
             OutputStream outputStream = exchange.getResponseBody();
@@ -47,6 +53,12 @@ public class HttpConnection {
             outputStream.write(response.getBytes());
             outputStream.flush();
             outputStream.close();
+        }
+
+        private JSONObject parseRequestBody(InputStream requestBody) throws IOException {
+            byte[] requestBodyBytes = requestBody.readAllBytes();
+            String requestBodyString = new String(requestBodyBytes);
+            return new JSONObject(requestBodyString);
         }
     }
 }

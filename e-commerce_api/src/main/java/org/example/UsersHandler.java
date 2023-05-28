@@ -5,7 +5,10 @@ import org.json.JSONObject;
 import org.json.JSONString;
 
 import javax.xml.crypto.Data;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
+import java.util.HashMap;
 
 public class UsersHandler {
     private Database database;
@@ -80,7 +83,52 @@ public class UsersHandler {
         return rowsAffected + " rows deleted!";
     }
 
-    public String postMethod(String path){
-        
+    public String postMethod(JSONObject requestBodyJson){
+        String firstName = requestBodyJson.optString("first_name");
+        String lastName = requestBodyJson.optString("last_name");
+        String email = requestBodyJson.optString("email");
+        String phoneNumber = requestBodyJson.optString("phone_number");
+        String type = requestBodyJson.optString("type");
+        PreparedStatement statement = null;
+        int rowsAffected = 0;
+
+        String query = "INSERT INTO users(first_name, last_name, email, phone_numer, type) VALUES(?,?,?,?,?)";
+        try {
+            statement = database.getConnection().prepareStatement(query);
+            statement.setString(1, firstName);
+            statement.setString(2, lastName);
+            statement.setString(3, email);
+            statement.setString(4, phoneNumber);
+            statement.setString(5, type);
+            rowsAffected = statement.executeUpdate();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return rowsAffected + " rows inserted!";
+    }
+
+    public String putMethod(String path, JSONObject requestBodyJson){
+        int userId = Integer.parseInt(path.substring(path.lastIndexOf("/") + 1));
+        String firstName = requestBodyJson.optString("first_name");
+        String lastName = requestBodyJson.optString("last_name");
+        String email = requestBodyJson.optString("email");
+        String phoneNumber = requestBodyJson.optString("phone_number");
+        String type = requestBodyJson.optString("type");
+        PreparedStatement statement = null;
+        int rowsAffected = 0;
+
+        String query = "UPDATE users SET first_name = ?, last_name = ?, email = ?, phone_numer = ?, type = ? WHERE id=" + userId;
+        try {
+            statement = database.getConnection().prepareStatement(query);
+            statement.setString(1, firstName);
+            statement.setString(2, lastName);
+            statement.setString(3, email);
+            statement.setString(4, phoneNumber);
+            statement.setString(5, type);
+            rowsAffected = statement.executeUpdate();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return rowsAffected + " rows updated!";
     }
 }
