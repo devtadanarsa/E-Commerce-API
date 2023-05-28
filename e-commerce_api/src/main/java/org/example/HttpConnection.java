@@ -3,32 +3,46 @@ package org.example;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-public class HttpConnection {
-    public static void startServer() throws IOException {
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress("localhost", 8060), 0);
-        httpServer.createContext("/api/greeting", new MovieHandler());
-        httpServer.setExecutor(Executors.newSingleThreadExecutor());
-        httpServer.start();
 
+public class HttpConnection {
+    private UsersHandler usersHandler;
+
+    public HttpConnection(){
+        Database database = new Database();
+        usersHandler = new UsersHandler(database);
     }
 
-    private static class MovieHandler implements HttpHandler {
+    public void startServer() throws IOException {
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress("localhost", 8060), 0);
+        httpServer.createContext("/", new Handler());
+        httpServer.setExecutor(Executors.newSingleThreadExecutor());
+        httpServer.start();
+    }
+
+    private class Handler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            if("GET".equals(exchange.getRequestMethod())){
-                OutputStream outputStream = exchange.getResponseBody();
-                String responseToSentBack = "Halo Brow";
-                exchange.sendResponseHeaders(200, responseToSentBack.length());
-                outputStream.write(responseToSentBack.getBytes());
-                outputStream.flush();
-                outputStream.close();
+            String method = exchange.getRequestMethod();
+            String path = exchange.getRequestURI().getPath();
+            String response = "";
+
+            if(path.contains("/users") && method.equals("GET")){
+                response = usersHandler.getMethod(path);
             }
+
+            OutputStream outputStream = exchange.getResponseBody();
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+            outputStream.close();
         }
     }
 }
