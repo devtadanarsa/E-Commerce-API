@@ -35,6 +35,10 @@ public class HttpConnection {
 
             if(path.contains("/users") && method.equals("GET")){
                 response = usersHandler.getMethod(path);
+            }else if(path.contains("/users") && method.equals("DELETE")){
+                response = usersHandler.deleteMethod(path);
+            }else if(path.contains("/users") && method.equals("POST")){
+
             }
 
             OutputStream outputStream = exchange.getResponseBody();

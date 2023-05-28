@@ -65,5 +65,22 @@ public class UsersHandler {
         JSONArray jsonArray = this.getUsers(userId);
         return jsonArray.toString();
     }
-    
+
+    public String deleteMethod(String path){
+        PreparedStatement statement = null;
+        int userId = Integer.parseInt(path.substring(path.lastIndexOf("/") + 1));
+        int rowsAffected = 0;
+        try {
+            String query = "DELETE FROM users WHERE id=" + userId;
+            statement = this.database.getConnection().prepareStatement(query);
+            rowsAffected = statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return rowsAffected + " rows deleted!";
+    }
+
+    public String postMethod(String path){
+        
+    }
 }
