@@ -20,19 +20,14 @@ public class UsersHandler {
     public String getUsers(int usersId){
         JSONArray jsonArray = new JSONArray();
         String query = "";
-        switch (usersId){
-            case 0 :
-                query = "SELECT * FROM users";
-                break;
-            case -1 :
-                query = "SELECT * FROM users WHERE type='Buyer'";
-                break;
-            case -2 :
-                query = "SELECT * FROM users WHERE type='Seller'";
-                break;
-            default:
-                query = "SELECT * FROM users WHERE id=" + usersId;
-                break;
+        if (usersId == 0) {
+            query = "SELECT * FROM users";
+        }else if(usersId == -1){
+            query = "SELECT * FROM users WHERE type='Buyer'";
+        }else if(usersId == -2){
+            query = "SELECT * FROM users WHERE type='Seller'";
+        }else{
+            query = "SELECT * FROM users WHERE id=" + usersId;
         }
 
         try (Connection connection = database.getConnection()){
@@ -61,9 +56,35 @@ public class UsersHandler {
         }else if(path.length == 3){
             response = getUsers(Integer.parseInt(path[2]));
         }else if(path.length == 4){
-            response = getUserProducts(Integer.parseInt(path[2]));
+            if(path[3].equals("products")){
+                response = getUserProducts(Integer.parseInt(path[2]));
+            }else if(path[3].equals("orders")){
+                response = getUsersOrders(path[2]);
+            }
         }
         return response;
+    }
+
+    public String getUsersOrders(String usersId){
+        JSONArray jsonArray = new JSONArray();
+        String query = "SELECT * FROM orders WHERE buyer=" + usersId;
+        try (Connection connection = database.getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()){
+                JSONObject jsonUSer = new JSONObject();
+                jsonUSer.put("id", resultSet.getInt("id"));
+                jsonUSer.put("buyer", resultSet.getInt("buyer"));
+                jsonUSer.put("note", resultSet.getInt("note"));
+                jsonUSer.put("total", resultSet.getInt("total"));
+                jsonUSer.put("discount", resultSet.getInt("discount"));
+                jsonUSer.put("is_paid", resultSet.getString("is_paid"));
+                jsonArray.put(jsonUSer);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return jsonArray.toString();
     }
 
     public String getUserProducts(int userId){

@@ -16,11 +16,13 @@ import java.util.concurrent.Executors;
 public class HttpConnection {
     private UsersHandler usersHandler;
     private ProductsHandler productsHandler;
+    private OrdersHandler ordersHandler;
 
     public HttpConnection(){
         Database database = new Database();
         usersHandler = new UsersHandler(database);
         productsHandler = new ProductsHandler(database);
+        ordersHandler = new OrdersHandler(database);
     }
 
     public void startServer() throws IOException {
@@ -56,6 +58,9 @@ public class HttpConnection {
                 }else if(path[1].equals("products")){
                     JSONObject requestBodyJson = parseRequestBody(exchange.getRequestBody());
                     response = productsHandler.postMethod(requestBodyJson);
+                }else if(path[1].equals("orders")){
+                    JSONObject requestBodyJson = parseRequestBody(exchange.getRequestBody());
+                    response = ordersHandler.postMethod(requestBodyJson);
                 }
             }else if(method.equals("PUT")){
                 if(path[1].equals("users")){
@@ -64,6 +69,9 @@ public class HttpConnection {
                 }else if(path[1].equals("products")){
                     JSONObject requestBodyJson = parseRequestBody(exchange.getRequestBody());
                     response = productsHandler.putMethod(path[2],requestBodyJson);
+                }else if(path[1].equals("orders")){
+                    JSONObject requestBodyJson = parseRequestBody(exchange.getRequestBody());
+                    response = ordersHandler.putMethod(path[2],requestBodyJson);
                 }
             }
             OutputStream outputStream = exchange.getResponseBody();
