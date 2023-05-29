@@ -17,7 +17,7 @@ public class UsersHandler {
             this.database = database;
     }
 
-    private JSONArray getUsers(int usersId){
+    public String getUsers(int usersId){
         JSONArray jsonArray = new JSONArray();
         String query = "";
         switch (usersId){
@@ -51,27 +51,45 @@ public class UsersHandler {
         }catch (SQLException e){
             e.printStackTrace();
         }
-        return jsonArray;
-    }
-
-    public String getMethod(String path){
-        int userId;
-        if(Character.isDigit(path.charAt(path.length() - 1))){
-            userId = Integer.parseInt(path.substring(path.lastIndexOf("/") + 1));
-        }else if(path.contains("buyer")){
-            userId = -1;
-        }else if(path.contains("seller")){
-            userId = -2;
-        }else{
-            userId = 0;
-        }
-        JSONArray jsonArray = this.getUsers(userId);
         return jsonArray.toString();
     }
 
-    public String deleteMethod(String path){
+    public String getUsersMethod(String[] path){
+        String response = "";
+        if(path.length == 2){
+            response = getUsers(0);
+        }else if(path.length == 3){
+            response = getUsers(Integer.parseInt(path[2]));
+        }else if(path.length == 4){
+            response = getUserProducts(Integer.parseInt(path[2]));
+        }
+        return response;
+    }
+
+    public String getUserProducts(int userId){
+        JSONArray jsonArray = new JSONArray();
+        String query = "SELECT * FROM products WHERE seller=" + userId;
+        try (Connection connection = database.getConnection()){
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(query);
+            while (resultSet.next()){
+                JSONObject jsonUSer = new JSONObject();
+                jsonUSer.put("id", resultSet.getInt("id"));
+                jsonUSer.put("seller", resultSet.getInt("seller"));
+                jsonUSer.put("title", resultSet.getString("title"));
+                jsonUSer.put("description", resultSet.getString("description"));
+                jsonUSer.put("price", resultSet.getString("price"));
+                jsonUSer.put("stock", resultSet.getInt("stock"));
+                jsonArray.put(jsonUSer);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return jsonArray.toString();
+    }
+
+    public String deleteMethod(int userId){
         PreparedStatement statement = null;
-        int userId = Integer.parseInt(path.substring(path.lastIndexOf("/") + 1));
         int rowsAffected = 0;
         try {
             String query = "DELETE FROM users WHERE id=" + userId;
@@ -107,8 +125,7 @@ public class UsersHandler {
         return rowsAffected + " rows inserted!";
     }
 
-    public String putMethod(String path, JSONObject requestBodyJson){
-        int userId = Integer.parseInt(path.substring(path.lastIndexOf("/") + 1));
+    public String putMethod(String userId, JSONObject requestBodyJson){
         String firstName = requestBodyJson.optString("first_name");
         String lastName = requestBodyJson.optString("last_name");
         String email = requestBodyJson.optString("email");
