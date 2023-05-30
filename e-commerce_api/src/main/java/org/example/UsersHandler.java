@@ -30,7 +30,8 @@ public class UsersHandler {
             query = "SELECT * FROM users WHERE id=" + usersId;
         }
 
-        try (Connection connection = database.getConnection()){
+        try {
+            Connection connection = database.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
@@ -68,7 +69,8 @@ public class UsersHandler {
     public String getUsersOrders(String usersId){
         JSONArray jsonArray = new JSONArray();
         String query = "SELECT * FROM orders WHERE buyer=" + usersId;
-        try (Connection connection = database.getConnection()){
+        try{
+            Connection connection = database.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){

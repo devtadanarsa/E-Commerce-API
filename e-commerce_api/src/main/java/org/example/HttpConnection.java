@@ -41,9 +41,13 @@ public class HttpConnection {
             String response = "";
             if(method.equals("GET")){
                 if(path[1].equals("users")){
-                    response = usersHandler.getUsersMethod(path);
-                }else if(path[1].equals("products")){
-                    response = productsHandler.getMethod(path);
+                    if(query == null){
+                        response = usersHandler.getUsersMethod(path);
+                    }else if(query.equals("type=buyer")){
+                        response = usersHandler.getUsers(-1);
+                    }else if(query.equals("type=seller")){
+                        response = usersHandler.getUsers(-2);
+                    }
                 }
             }else if(method.equals("DELETE")){
                 if(path[1].equals("users")){

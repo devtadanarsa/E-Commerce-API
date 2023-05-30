@@ -15,7 +15,8 @@ public class OrdersHandler {
     public String getProduct(String usersId){
         JSONArray jsonArray = new JSONArray();
         String query = "SELECT * FROM orders WHERE buyer=" + usersId;
-        try (Connection connection = database.getConnection()){
+        try {
+            Connection connection = database.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){

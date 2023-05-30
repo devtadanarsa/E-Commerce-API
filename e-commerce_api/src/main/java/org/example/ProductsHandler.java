@@ -35,7 +35,8 @@ public class ProductsHandler {
                 break;
         }
 
-        try (Connection connection = database.getConnection()){
+        try {
+            Connection connection = database.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()){
@@ -75,7 +76,6 @@ public class ProductsHandler {
         int stock = requestBodyJson.optInt("stock");
         PreparedStatement statement = null;
         int rowsAffected = 0;
-
         String query = "INSERT INTO products(seller, title, description, price, stock) VALUES(?,?,?,?,?)";
         try {
             statement = database.getConnection().prepareStatement(query);
