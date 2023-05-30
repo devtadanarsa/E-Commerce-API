@@ -45,7 +45,6 @@ public class OrdersHandler {
                 }
                 jsonOrder.put("order_detail", jsonDetail);
                 jsonArray.put(jsonOrder);
-
                 JSONArray jsonReviewArray = new JSONArray();
                 try {
                     Statement statementReview = connection.createStatement();
@@ -125,4 +124,18 @@ public class OrdersHandler {
         }
         return rowsAffected + " rows updated!";
     }
+
+    public String deleteMethod(int userId){
+        PreparedStatement statement = null;
+        int rowsAffected = 0;
+        try {
+            String query = "DELETE FROM orders WHERE id=" + userId;
+            statement = this.database.getConnection().prepareStatement(query);
+            rowsAffected = statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return rowsAffected + " rows deleted!";
+    }
 }
+

@@ -20,7 +20,7 @@ public class UsersHandler {
     public String getUsers(int usersId, String addedQuery){
         JSONArray jsonArray = new JSONArray();
         String querySQL = "";
-
+        String queryAddresses = "SELECT * FROM addresses";
         if (usersId == 0) {
             querySQL = "SELECT * FROM users";
         }else if(addedQuery != null) {
@@ -69,6 +69,23 @@ public class UsersHandler {
                 jsonUSer.put("email", resultSet.getString("email"));
                 jsonUSer.put("phoneNumber", resultSet.getString("phone_numer"));
                 jsonUSer.put("type", resultSet.getString("type"));
+                JSONArray jsonAddressesArr = new JSONArray();
+                try {
+                    Statement statementAddress = connection.createStatement();
+                    ResultSet resultSetAddress = statementAddress.executeQuery(queryAddresses);
+                    while (resultSetAddress.next()){
+                        JSONObject jsonAddresses = new JSONObject();
+                        jsonAddresses.put("line1",resultSetAddress.getString("line1"));
+                        jsonAddresses.put("line2",resultSetAddress.getString("line2"));
+                        jsonAddresses.put("city",resultSetAddress.getString("city"));
+                        jsonAddresses.put("province",resultSetAddress.getString("province"));
+                        jsonAddresses.put("postcode", resultSetAddress.getString("postcode"));
+                        jsonAddressesArr.put(jsonAddresses);
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+                jsonUSer.put("addresses", jsonAddressesArr);
                 jsonArray.put(jsonUSer);
             }
         }catch (SQLException e){

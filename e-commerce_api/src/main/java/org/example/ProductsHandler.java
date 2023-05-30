@@ -13,32 +13,59 @@ public class ProductsHandler {
         this.database = database;
     }
 
-    public String getMethod(String[] path){
+    public String getProductsMethod(String[] path, String query){
         String response = "";
         if(path.length == 2){
-            response = getProducts(0);
-        }else{
-            response = getProducts(Integer.parseInt(path[2]));
+            response = getProducts(0, query);
+        }else if(path.length == 3){
+            response = getProducts(Integer.parseInt(path[2]), query);
         }
         return response;
     }
 
-    public String getProducts(int productId){
+    public String getProducts(int productId, String addedQuery){
         JSONArray jsonArray = new JSONArray();
-        String query = "";
-        switch (productId){
-            case 0 :
-                query = "SELECT * FROM products";
-                break;
-            default:
-                query = "SELECT * FROM products WHERE id=" + productId;
-                break;
+        String querySQL = "";
+
+        if(addedQuery != null){
+            String[] query = addedQuery.split("&");
+            String queryField = "";
+            String queryCondition = "";
+            int queryValue = 0;
+            for(int i = 0; i < query.length; i++){
+                if(query[i].contains("field")){
+                    queryField = query[i].substring(query[i].lastIndexOf("=") + 1);
+                }else if(query[i].contains("val")){
+                    queryValue = Integer.parseInt(query[i].substring(query[i].lastIndexOf("=") + 1));
+                }else if(query[i].contains("cond")){
+                    String cond = query[i].substring(query[i].lastIndexOf("=") + 1);
+                    if(cond.equals("larger")){
+                        queryCondition = ">";
+                    }else if(cond.equals("largerEqual")){
+                        queryCondition = ">=";
+                    }else if(cond.equals("smaller")){
+                        queryCondition = "<";
+                    }else if(cond.equals("smallerEqual")){
+                        queryCondition = "<=";
+                    }
+                }
+            }
+            querySQL = "SELECT * FROM products WHERE " + queryField + queryCondition + " " + queryValue + " ";
+        }else{
+            switch (productId){
+                case 0 :
+                    querySQL = "SELECT * FROM products";
+                    break;
+                default:
+                    querySQL = "SELECT * FROM products WHERE id=" + productId;
+                    break;
+            }
         }
 
         try {
             Connection connection = database.getConnection();
             Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
+            ResultSet resultSet = statement.executeQuery(querySQL);
             while (resultSet.next()){
                 JSONObject jsonUSer = new JSONObject();
                 jsonUSer.put("id", resultSet.getInt("id"));
