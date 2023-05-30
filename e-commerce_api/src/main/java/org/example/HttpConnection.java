@@ -3,7 +3,6 @@ package org.example;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -41,13 +40,11 @@ public class HttpConnection {
             String response = "";
             if(method.equals("GET")){
                 if(path[1].equals("users")){
-                    if(query == null){
-                        response = usersHandler.getUsersMethod(path);
-                    }else if(query.equals("type=buyer")){
-                        response = usersHandler.getUsers(-1);
-                    }else if(query.equals("type=seller")){
-                        response = usersHandler.getUsers(-2);
-                    }
+                    response = usersHandler.getUsersMethod(path, query);
+                }else if(path[1].equals("products")){
+                    response = productsHandler.getProducts(0);
+                }else if(path[1].equals("orders")){
+                    response = ordersHandler.getOrders(path[2]);
                 }
             }else if(method.equals("DELETE")){
                 if(path[1].equals("users")){
